@@ -1,23 +1,42 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Dimensions, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 
 class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      data: ''
+      isLoading: true,
+      data: '',
+      page: 1
     }
     console.disableYellowBox = true;
   }
 
   makeRequest = () => {
-    axios.get('https://tutorialsha.com/api/users?1')
+    axios.get(`https://tutorialsha.com/api/users?{this.state.page}`)
     .then(res => {
       this.setState({
-        data: res.data.data
+        isLoading: false,
+        data: [...this.state.data, ...res.data.data]
       })
     })
+  }
+
+  handleLoadMore = () => {
+    this.setState({
+      page: this.state.page + 1
+    }, () => {
+      this.makeRequest()
+    })
+  }
+
+  renderFooter = () => {
+    return (
+      <View>
+        <ActivityIndicator animating size = 'large'></ActivityIndicator>
+      </View>
+    )
   }
 
   componentDidMount(){
@@ -25,11 +44,20 @@ class App extends Component {
   }
 
   render() {
+
+    if(this.state.isLoading){
+      <View style={{flex:1, padding:20, alignItems:'center', justifyContent:'center'}}>
+        <ActivityIndicator animating size="large"></ActivityIndicator>
+      </View>
+    }
     return (
       <View style={styles.container}>
         <FlatList
           data={this.state.data}
           keyExtractor={(item) => item.first_name}
+          onEndReached={this.handleLoadMore}
+          ListFooterComponent={this.renderFooter}
+          onEndReachedThreshold={200}
           renderItem={({item, index}) => {
             return (
             <View style={[styles.itemView, index % 2 > 0 ? styles.itemOdd : styles.itemEven]}>
