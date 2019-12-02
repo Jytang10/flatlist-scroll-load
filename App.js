@@ -1,19 +1,74 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import axios from 'axios';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
-  );
+class App extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      data: ''
+    }
+    console.disableYellowBox = true;
+  }
+
+  makeRequest = () => {
+    axios.get('https://tutorialsha.com/api/users?1')
+    .then(res => {
+      this.setState({
+        data: res.data.data
+      })
+    })
+  }
+
+  componentDidMount(){
+    this.makeRequest();
+  }
+
+  render() {
+    console.log(this.state.data)
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={this.state.data}
+          keyExtractor={(item) => item.first_name}
+          renderItem={({item, index}) => {
+            console.log(item);
+            <View style={styles.itemView}>
+              <View style={styles.imgContainer}>
+                <Image source={{uri:item.avatar}} style={styles.imageStyle}></Image>
+              </View>
+              <View style={styles.itemInfo}>
+                <Text style={styles.name}>{item.first_name + ' ' + item.last_name}</Text>  
+                <Text numberOfLines={1}>{item.email}</Text>  
+              </View>
+            </View>
+          }}
+        >
+        </FlatList>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
+  itemView: {
+
+  },
+  imgContainer: {
+
+  },
+  imageStyle: {
+
+  },
+  itemInfo: {
+
+  }
 });
+
+export default App;
